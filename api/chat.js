@@ -1,47 +1,50 @@
-// api/chat.js
+// File: api/chat.js
 module.exports = async (req, res) => {
+  // Only allow POST from the browser
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method Not Allowed' });
+    res.status(405).json({ error: 'Method Not Allowed' });
+    return;
   }
 
   try {
     const { message } = req.body || {};
-    if (!message || typeof message !== 'string') {
-      return res.status(400).json({ error: 'Missing message' });
+    if (!message) {
+      res.status(400).json({ error: 'Missing "message" in body' });
+      return;
     }
 
+    const apiKey = process.env.OPENAI_API_KEY;
+    if (!apiKey) {
+      res.status(500).json({ error: 'Missing OPENAI_API_KEY' });
+      return;
+    }
+
+    // Call OpenAI with plain fetch (no extra deps)
     const r = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
+        'Authorization': `Bearer ${apiKey}`
       },
       body: JSON.stringify({
         model: 'gpt-4o-mini',
         messages: [
-          {
-            role: 'system',
-            content:
-              "You are Aeris for Adrienne. Be warm, concise, and helpful. No fluff."
-          },
+          { role: 'system', content: 'You are Aeris, Adrienne’s friendly assistant. Be concise, warm, and practical.' },
           { role: 'user', content: message }
-        ],
-        temperature: 0.7
+        ]
       })
     });
 
-    const data = await r.json();
-
     if (!r.ok) {
-      const msg = data?.error?.message || 'OpenAI API error';
-      return res.status(r.status).json({ error: msg });
+      const text = await r.text();
+      res.status(r.status).json({ error: `OpenAI error ${r.status}`, detail: text });
+      return;
     }
 
-    const reply =
-      data?.choices?.[0]?.message?.content?.trim() || 'No response.';
-
-    return res.status(200).json({ reply });
+    const data = await r.json();
+    const reply = data?.choices?.[0]?.message?.content || 'No reply.';
+    res.status(200).json({ reply });
   } catch (err) {
-    return res.status(500).json({ error: err.message || 'Server error' });
+    res.status(500).json({ error: 'Server error', detail: String(err) });
   }
 };
