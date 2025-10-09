@@ -15,6 +15,28 @@
         <button>Send</button>
       </form>
     </div>
-    <script src="chat.js"></script>
+   <script>
+  const sendBtn = document.getElementById('send');
+  const out = document.getElementById('out');
+  const promptEl = document.getElementById('prompt');
+
+  sendBtn.onclick = async () => {
+    const text = (promptEl.value || "").trim();
+    if (!text) return;
+    out.textContent = "Thinking…";
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ message: text })
+      });
+      const data = await res.json();
+      out.textContent = data.reply || data.error || '(no data)';
+    } catch (err) {
+      out.textContent = 'Network error: ' + err.message;
+    }
+  };
+</script>
+
   </body>
 </html>
