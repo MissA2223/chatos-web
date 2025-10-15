@@ -5,32 +5,34 @@
   <title>ChatOS Web</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    :root { --pink:#ff3aa7; --bg:#0e0e10; --panel:#28282c; --text:#eee; }
-    * { box-sizing: border-box; }
-    body { margin:0; background:var(--bg); color:var(--text); font:16px/1.4 system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
-    .wrap { max-width:820px; margin:40px auto; padding:0 16px; }
-    h1 { text-align:center; color:var(--pink); margin:0 0 20px; }
-    .chat { background:rgba(255,255,255,0.04); border:2px solid var(--pink); border-radius:12px; padding:16px; height:60vh; overflow:auto; }
-    .msg { display:inline-block; padding:10px 12px; border-radius:10px; margin:10px 0; max-width:90%; }
-    .user  { background:var(--pink); color:#111; align-self:flex-end; }
-    .bot   { background:var(--panel); }
-    .row { display:flex; gap:8px; margin-top:12px; }
-    input[type="text"] { flex:1; padding:12px; border-radius:10px; border:2px solid var(--pink); background:#141418; color:var(--text); }
-    button { padding:12px 16px; border:none; background:var(--pink); color:#111; border-radius:10px; font-weight:700; cursor:pointer; }
-    .srcs { font-size:12px; opacity:.85; margin-top:6px; }
-    a { color:#b8e0ff; }
+    :root { --hot: #ff2fb3; --ink:#222; --panel:#333; --text:#eee; }
+    html,body{height:100%;margin:0;background:#000;color:var(--text);font-family:system-ui, -apple-system, Segoe UI, Roboto, sans-serif;}
+    .wrap{max-width:820px;margin:40px auto;padding:0 16px;}
+    h1{color:var(--hot);text-align:center;margin:0 0 18px;}
+    .panel{background:var(--panel);border:1px solid var(--hot);border-radius:10px;padding:16px;}
+    #chat-box{height:460px;overflow:auto;padding:8px 6px 0 6px;}
+    .bubble{max-width:85%;margin:8px 0;padding:10px 12px;border-radius:10px;background:#444}
+    .me{background:var(--hot);color:#111;margin-left:auto}
+    .bot{background:#555}
+    form{display:flex;gap:10px;margin-top:12px}
+    input{flex:1;background:#111;border:1px solid var(--hot);border-radius:8px;padding:12px;color:#fff}
+    button{background:var(--hot);border:0;color:#111;border-radius:8px;padding:0 16px;font-weight:700}
+    .sources{font-size:12px;opacity:.85;margin-top:6px}
+    .sources a{color:#cdd9ff}
   </style>
 </head>
 <body>
   <div class="wrap">
     <h1>ChatOS Web</h1>
-    <div id="chat-box" class="chat"></div>
-    <form id="chat-form" class="row" autocomplete="off">
-      <input id="user-input" type="text" placeholder="Type and hit Enter…" />
-      <button id="send-btn" type="submit">Send</button>
-    </form>
+    <div class="panel">
+      <div id="chat-box"></div>
+      <form id="chat-form" autocomplete="off">
+        <input id="user-input" type="text" placeholder="Type and hit Enter..." />
+        <button id="send-btn" type="submit">Send</button>
+      </form>
+    </div>
   </div>
 
-  <script src="/main.js"></script>
+  <script src="/chat.js" defer></script>
 </body>
 </html>
