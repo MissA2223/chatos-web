@@ -1,19 +1,46 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="utf-8" />
   <title>ChatOS</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body { background:#111; color:#eee; font-family:system-ui,sans-serif; display:flex; flex-direction:column; align-items:center; gap:12px; margin:0; padding:24px; }
+    h1 { color:#ff66c4; margin:0; }
+    #chat-box { width:100%; max-width:560px; height:380px; overflow-y:auto; border:2px solid #ff66c4; border-radius:10px; padding:12px; background:#1e1e1e; }
+    .msg { margin:8px 0; padding:8px 12px; border-radius:8px; max-width:80%; }
+    .user { background:#ff66c4; color:#111; margin-left:auto; }
+    .bot  { background:#2c2c2c; color:#eee; margin-right:auto; }
+    form { display:flex; gap:8px; width:100%; max-width:560px; }
+    input { flex:1; padding:10px 12px; border-radius:8px; border:1px solid #444; background:#1a1a1a; color:#eee; }
+    button { padding:10px 16px; border:0; border-radius:8px; background:#ff66c4; color:#111; font-weight:600; cursor:pointer; }
+  </style>
 </head>
 <body>
+  <h1>ChatOS Web</h1>
   <div id="chat-box"></div>
 
   <form id="chat-form">
-    <input id="user-input" type="text" placeholder="Type..." />
-    <button id="sendBtn">Send</button>
+    <input id="user-input" placeholder="Type and hit Enter…" autocomplete="off" />
+    <button id="sendBtn" type="submit">Send</button>
   </form>
 
   <script>
-    async function sendMessage() {
+    const chatBox   = document.getElementById('chat-box');
+    const form      = document.getElementById('chat-form');
+    const userInput = document.getElementById('user-input');
+    const sendBtn   = document.getElementById('sendBtn');
+
+    function addMessage(text, who='bot') {
+      const div = document.createElement('div');
+      div.className = `msg ${who}`;
+      div.textContent = text;
+      chatBox.appendChild(div);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
       const message = userInput.value.trim();
       if (!message) return;
 
@@ -22,20 +49,25 @@
       sendBtn.disabled = true;
 
       try {
-        const response = await fetch('/api/chat', {
+        const res = await fetch('/api/chat', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ message })
         });
 
-        const data = await response.json();
-        addMessage(data.reply || data.error || 'No response.', 'bot');
+        let data;
+        try { data = await res.json(); } catch { data = {}; }
+
+        addMessage(data.reply || data.error || `HTTP ${res.status}`, 'bot');
       } catch (err) {
         addMessage('Error: ' + err.message, 'bot');
       } finally {
         sendBtn.disabled = false;
       }
-    }
+    });
+
+    // Optional hello message
+    addMessage("Hi! I'm online. Ask me anything.", 'bot');
   </script>
 </body>
 </html>
