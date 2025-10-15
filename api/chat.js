@@ -61,7 +61,7 @@ export default async function handler(req, res) {
         'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini', // or another chat-capable model you’re using
+        model: 'gpt-4o', // or another chat-capable model you’re using
         messages,
         temperature: 0.3
       })
