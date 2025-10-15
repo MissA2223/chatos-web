@@ -1,41 +1,63 @@
-// api/chat.js
-module.exports = async (req, res) => {
-  if (req.method !== 'POST') {
-    res.status(405).json({ error: 'Method Not Allowed' });
-    return;
+<script>
+  // --- DOM elements (IDs must match your HTML) ---
+  const chatBox   = document.getElementById('chat-box');
+  const userInput = document.getElementById('user-input');
+  const sendBtn   = document.getElementById('sendBtn');
+  const form      = document.getElementById('chat-form');
+
+  // --- Render a message bubble ---
+  function addMessage(text, who = 'bot') {
+    const div = document.createElement('div');
+    div.className = 'message ' + who; // optional classes if you style them
+    div.textContent = text;
+    chatBox.appendChild(div);
+    chatBox.scrollTop = chatBox.scrollHeight; // auto-scroll to bottom
   }
 
-  try {
-    const { message } = req.body || {};
-    if (!message) {
-      res.status(400).json({ error: 'Missing message' });
-      return;
+  // --- Send the user's message to the API ---
+  async function sendMessage() {
+    const message = userInput.value.trim();
+    if (!message) return;
+
+    addMessage(message, 'user');
+    userInput.value = '';
+    sendBtn.disabled = true;
+
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message }) // <— sends { message: "..." }
+      });
+
+      const data = await res.json();
+      addMessage(data.reply || data.error || 'No response.', 'bot');
+    } catch (err) {
+      addMessage('Error: ' + err.message, 'bot');
+    } finally {
+      sendBtn.disabled = false;
+      userInput.focus();
     }
-
-    const apiKey = process.env.OPENAI_API_KEY;
-    if (!apiKey) {
-      res.status(500).json({ error: 'Missing API key' });
-      return;
-    }
-
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
-          { role: 'system', content: 'You are Aeris, Adrienne’s helpful and friendly assistant.' },
-          { role: 'user', content: message }
-        ]
-      })
-    });
-
-    const data = await response.json();
-    res.status(200).json({ reply: data.choices?.[0]?.message?.content || 'No response.' });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
   }
-};
+
+  // --- Wire up submit + Enter key + button click ---
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    sendMessage();
+  });
+
+  sendBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    sendMessage();
+  });
+
+  userInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  });
+
+  // Optional: greet
+  addMessage("Hi! I'm online. Ask me anything.", 'bot');
+</script>
