@@ -1,63 +1,20 @@
-<script>
-  // --- DOM elements (IDs must match your HTML) ---
-  const chatBox   = document.getElementById('chat-box');
-  const userInput = document.getElementById('user-input');
-  const sendBtn   = document.getElementById('sendBtn');
-  const form      = document.getElementById('chat-form');
+// /api/chat.js
 
-  // --- Render a message bubble ---
-  function addMessage(text, who = 'bot') {
-    const div = document.createElement('div');
-    div.className = 'message ' + who; // optional classes if you style them
-    div.textContent = text;
-    chatBox.appendChild(div);
-    chatBox.scrollTop = chatBox.scrollHeight; // auto-scroll to bottom
+export default async function handler(req, res) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  // --- Send the user's message to the API ---
-  async function sendMessage() {
-    const message = userInput.value.trim();
-    if (!message) return;
+  try {
+    const { message } = req.body;
 
-    addMessage(message, 'user');
-    userInput.value = '';
-    sendBtn.disabled = true;
+    // For now, let's just echo the message back.
+    // Later you can plug in OpenAI, Gemini, or your own model here.
+    const reply = `You said: ${message}`;
 
-    try {
-      const res = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message }) // <— sends { message: "..." }
-      });
-
-      const data = await res.json();
-      addMessage(data.reply || data.error || 'No response.', 'bot');
-    } catch (err) {
-      addMessage('Error: ' + err.message, 'bot');
-    } finally {
-      sendBtn.disabled = false;
-      userInput.focus();
-    }
+    return res.status(200).json({ reply });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: 'Server error' });
   }
-
-  // --- Wire up submit + Enter key + button click ---
-  form.addEventListener('submit', (e) => {
-    e.preventDefault();
-    sendMessage();
-  });
-
-  sendBtn.addEventListener('click', (e) => {
-    e.preventDefault();
-    sendMessage();
-  });
-
-  userInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
-    }
-  });
-
-  // Optional: greet
-  addMessage("Hi! I'm online. Ask me anything.", 'bot');
-</script>
+}
