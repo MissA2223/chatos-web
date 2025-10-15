@@ -23,10 +23,9 @@ export default async function handler(req, res) {
       const tvRes = await fetch('https://api.tavily.com/search', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          // Tavily supports either header or body api_key; we send both to be safe
-          'Authorization': `Bearer ${process.env.TAVILY_API_KEY}`,
-        },
+  'Content-Type': 'application/json',
+  'X-API-Key': process.env.TAVILY_API_KEY,
+}
         body: JSON.stringify({
           api_key: process.env.TAVILY_API_KEY,
           query: userQuestion,
