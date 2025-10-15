@@ -6,6 +6,7 @@
 </head>
 <body>
   <div id="chat-box"></div>
+
   <form id="chat-form">
     <input id="user-input" type="text" placeholder="Type..." />
     <button id="sendBtn">Send</button>
@@ -26,6 +27,7 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ message })
         });
+
         const data = await response.json();
         addMessage(data.reply || data.error || 'No response.', 'bot');
       } catch (err) {
